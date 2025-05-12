@@ -85,7 +85,8 @@ spring:
   cloud:
     sentinel:
       transport:
-        dashboard: localhost:8083
+        dashboard: localhost:8080
+
 mybatis-plus:
   configuration:
     map-underscore-to-camel-case: false  # 禁用下划线转驼峰命名转换

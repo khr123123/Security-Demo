@@ -2,7 +2,6 @@ package org.khr.securitydemo.sentinel;
 
 import cn.hutool.core.io.FileUtil;
 import com.alibaba.csp.sentinel.datasource.*;
-import com.alibaba.csp.sentinel.slots.block.RuleConstant;
 import com.alibaba.csp.sentinel.slots.block.degrade.DegradeRule;
 import com.alibaba.csp.sentinel.slots.block.degrade.DegradeRuleManager;
 import com.alibaba.csp.sentinel.slots.block.degrade.circuitbreaker.CircuitBreakerStrategy;
@@ -18,7 +17,6 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -33,27 +31,10 @@ public class SentinelRulesManager {
     @PostConstruct
     public void initRules() throws Exception {
         initFlowRules();
-        initFlowRules2();
         initDegradeRules();
         listenRules();
     }
-    // 定义限流规则
-    private static void initFlowRules2(){
-        List<FlowRule> rules=new ArrayList<>();
-        log.info("initFlowRules2");
-        // 定义一个限流规则
-        FlowRule flowRule=new FlowRule();
-        flowRule.setResource("getid"); // 资源名|必须参数
-        flowRule.setGrade(RuleConstant.FLOW_GRADE_QPS); // 限流指标：QPS/线程数 |必须参数
-        flowRule.setCount(1);  // 限流数量（上一步 QPS 或线程数的值） |必须参数
-        flowRule.setStrategy(RuleConstant.STRATEGY_DIRECT); //调用关系限流策略【非必须设置】
-        flowRule.setControlBehavior(RuleConstant.CONTROL_BEHAVIOR_DEFAULT); // 流控效果【非必须设置】
-        flowRule.setClusterMode(false); // 是否集群限流【非必须设置，默认非集群】
 
-        rules.add(flowRule);
-
-        FlowRuleManager.loadRules(rules);
-    }
     /**
      * 初始化限流规则
      */
