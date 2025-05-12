@@ -1,17 +1,23 @@
 package org.khr.securitydemo.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.Wrapper;
+import cn.hutool.core.collection.CollUtil;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.khr.securitydemo.constant.CommonConstant;
 import org.khr.securitydemo.mapper.QuestionBankMapper;
 import org.khr.securitydemo.model.dto.QuestionBankQueryRequest;
 import org.khr.securitydemo.model.entity.QuestionBank;
 import org.khr.securitydemo.model.vo.QuestionBankVO;
 import org.khr.securitydemo.service.QuestionBankService;
+import org.khr.securitydemo.utils.SqlUtils;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author 3031208
@@ -22,28 +28,69 @@ import java.util.List;
 public class QuestionBankServiceImpl extends ServiceImpl<QuestionBankMapper, QuestionBank>
         implements QuestionBankService {
 
+    /**
+     * 获取查询条件
+     *
+     * @param questionBankQueryRequest
+     * @return
+     */
     @Override
-    public Wrapper<QuestionBank> getQueryWrapper(QuestionBankQueryRequest questionBankQueryRequest) {
+    public QueryWrapper<QuestionBank> getQueryWrapper(QuestionBankQueryRequest questionBankQueryRequest) {
+        QueryWrapper<QuestionBank> queryWrapper = new QueryWrapper<>();
+        if (questionBankQueryRequest == null) {
+            return queryWrapper;
+        }
         Long id = questionBankQueryRequest.getId();
         Long notId = questionBankQueryRequest.getNotId();
-        String searchText = questionBankQueryRequest.getSearchText();
         String title = questionBankQueryRequest.getTitle();
-        String description = questionBankQueryRequest.getDescription();
-        String picture = questionBankQueryRequest.getPicture();
-        Long userId = questionBankQueryRequest.getUserId();
-        boolean needQueryQuestionList = questionBankQueryRequest.isNeedQueryQuestionList();
-        long current = questionBankQueryRequest.getCurrent();
-        long pageSize = questionBankQueryRequest.getPageSize();
+        String searchText = questionBankQueryRequest.getSearchText();
         String sortField = questionBankQueryRequest.getSortField();
         String sortOrder = questionBankQueryRequest.getSortOrder();
+        Long userId = questionBankQueryRequest.getUserId();
+        String description = questionBankQueryRequest.getDescription();
+        String picture = questionBankQueryRequest.getPicture();
 
-        return null;
+        // 从多字段中搜索
+        if (StringUtils.isNotBlank(searchText)) {
+            // 需要拼接查询条件
+            queryWrapper.and(qw -> qw.like("title", searchText).or().like("description", searchText));
+        }
+        // 模糊查询
+        queryWrapper.like(StringUtils.isNotBlank(title), "title", title);
+        queryWrapper.like(StringUtils.isNotBlank(description), "description", description);
+        // 精确查询
+        queryWrapper.ne(ObjectUtils.isNotEmpty(notId), "id", notId);
+        queryWrapper.eq(ObjectUtils.isNotEmpty(id), "id", id);
+        queryWrapper.eq(ObjectUtils.isNotEmpty(userId), "userId", userId);
+        queryWrapper.eq(ObjectUtils.isNotEmpty(picture), "picture", picture);
+        // 排序规则
+        queryWrapper.orderBy(SqlUtils.validSortField(sortField),
+                sortOrder.equals(CommonConstant.SORT_ORDER_ASC),
+                sortField);
+        return queryWrapper;
     }
 
+
+    /**
+     * 分页获取题库封装
+     *
+     * @param questionBankPage
+     * @param request
+     * @return
+     */
     @Override
     public Page<QuestionBankVO> getQuestionBankVOPage(Page<QuestionBank> questionBankPage, HttpServletRequest request) {
-        return null;
+        List<QuestionBank> questionBankList = questionBankPage.getRecords();
+        Page<QuestionBankVO> questionBankVOPage = new Page<>(questionBankPage.getCurrent(), questionBankPage.getSize(), questionBankPage.getTotal());
+        if (CollUtil.isEmpty(questionBankList)) {
+            return questionBankVOPage;
+        }
+        // 对象列表 => 封装对象列表
+        List<QuestionBankVO> questionBankVOList = questionBankList.stream().map(QuestionBankVO::objToVo).collect(Collectors.toList());
+        questionBankVOPage.setRecords(questionBankVOList);
+        return questionBankVOPage;
     }
+
 }
 
 
