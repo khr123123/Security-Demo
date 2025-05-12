@@ -1,0 +1,118 @@
+server:
+  address: 0.0.0.0
+  port: 8888
+  servlet:
+    context-path: /api  # 设置统一的接口访问路径前缀
+
+spring:
+  application:
+    name: security-demo
+  profiles:
+    active: dev  # 当前激活的配置环境
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher  # 配置路径匹配策略，兼容老版本路径格式
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://47.117.123.182:3306/test
+    username: root
+    password: amin123
+    type: com.alibaba.druid.pool.DruidDataSource
+    druid:
+      # 初始化连接池中的连接数量
+      initial-size: 20
+      # 最小空闲连接数
+      minIdle: 20
+      # 最大活跃连接数
+      max-active: 200
+      # 获取连接的最大等待时间（毫秒）
+      max-wait: 2000
+      # 间隔多久进行一次检测，检测需要关闭的空闲连接（单位：毫秒）
+      time-between-eviction-runs-millis: 2000
+      # 连接在连接池中最小生存时间（单位：毫秒）
+      min-evictable-idle-time-millis: 600000
+      max-evictable-idle-time-millis: 900000
+      # 检测连接是否有效的 SQL 语句
+      validationQuery: select 1
+      # 空闲时检查连接是否有效，建议开启
+      testWhileIdle: true
+      # 获取连接时不检测（性能更优，需配合 testWhileIdle）
+      testOnBorrow: false
+      # 归还连接时不检测
+      testOnReturn: false
+      # 是否缓存 preparedStatement，提高性能（推荐开启）
+      poolPreparedStatements: true
+      # 单个连接上缓存的 preparedStatement 最大数量
+      maxOpenPreparedStatements: 20
+      # 是否保持连接活跃（避免因空闲被关闭）
+      keepAlive: true
+      # 指定哪些类的 JDBC 操作将被 Druid 的 AOP 监控
+      aop-patterns: "com.springboot.template.dao.*"
+
+      # 配置 Druid 的监控统计功能
+      filters: stat,wall,log4j2
+      filter:
+        stat:
+          enabled: true
+          db-type: mysql
+          log-slow-sql: true
+          slow-sql-millis: 2000  # 慢 SQL 定义阈值（单位：毫秒）
+        slf4j:
+          enabled: true
+          statement-log-error-enabled: true
+          statement-create-after-log-enabled: false
+          statement-close-after-log-enabled: false
+          result-set-open-after-log-enabled: false
+          result-set-close-after-log-enabled: false
+
+      # 配置 WebStatFilter，用于收集 web-jdbc 关联监控数据
+      web-stat-filter:
+        enabled: true
+        url-pattern: /*  # 监控所有请求
+        exclusions: "*.js,*.gif,*.jpg,*.png,*.css,*.ico,/druid/*"  # 排除静态资源和 Druid 控制台路径
+        session-stat-enable: true
+        session-stat-max-count: 1000  # 最大 session 统计数
+
+      # 配置 Druid 的监控页面（StatViewServlet）
+      stat-view-servlet:
+        enabled: true
+        url-pattern: /druid/*
+        reset-enable: false  # 禁用页面上的“Reset All”功能
+        login-username: root  # 登录监控页面的用户名
+        login-password: 123   # 登录监控页面的密码
+        allow: 127.0.0.1  # 仅允许本机访问
+        deny:  # 拒绝访问的 IP，优先生效于 allow
+  cloud:
+    sentinel:
+      transport:
+        dashboard: localhost:8083
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: false  # 禁用下划线转驼峰命名转换
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl  # 启用 SQL 输出日志
+  global-config:
+    db-config:
+      logic-delete-field: isDelete  # 全局逻辑删除字段
+      logic-delete-value: 1         # 删除时字段的值
+      logic-not-delete-value: 0     # 未删除时字段的值
+
+nacos:
+  config:
+    server-addr: 47.117.123.182:8848  # Nacos 配置中心地址
+    bootstrap:
+      enable: true  # 启用配置中心
+    data-id: security-demo  # Nacos 中的配置标识（Data ID）
+    group: DEFAULT_GROUP
+    type: yaml  # 配置格式
+    auto-refresh: true  # 启用自动刷新
+
+knife4j:
+  enable: true
+  openapi:
+    title: securitydemo
+    group:
+      test1:
+        group-name: 分组名称
+        api-rule: package
+        api-rule-resources:
+          - org.khr.securitydemo.controller
