@@ -12,6 +12,12 @@ spring:
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher  # 配置路径匹配策略，兼容老版本路径格式
+  cloud:
+    sentinel:
+      eager: true
+      transport:
+        dashboard: localhost:8080
+        client-ip: 127.0.0.1
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://47.117.123.182:3306/test
@@ -78,14 +84,11 @@ spring:
         enabled: true
         url-pattern: /druid/*
         reset-enable: false  # 禁用页面上的“Reset All”功能
-        login-username: root  # 登录监控页面的用户名
-        login-password: 123   # 登录监控页面的密码
+        login-username: druid  # 登录监控页面的用户名
+        login-password: druid   # 登录监控页面的密码
         allow: 127.0.0.1  # 仅允许本机访问
         deny:  # 拒绝访问的 IP，优先生效于 allow
-  cloud:
-    sentinel:
-      transport:
-        dashboard: localhost:8080
+
 
 mybatis-plus:
   configuration:
@@ -113,7 +116,7 @@ knife4j:
     title: securitydemo
     group:
       test1:
-        group-name: 分组名称
+        group-name:
         api-rule: package
         api-rule-resources:
           - org.khr.securitydemo.controller

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.springframework.boot</groupId>
@@ -47,12 +47,13 @@
             <artifactId>druid-spring-boot-starter</artifactId>
             <version>${druid.version}</version>
         </dependency>
+        <!--  knife4j接口文档  -->
         <dependency>
             <groupId>com.github.xiaoymin</groupId>
             <artifactId>knife4j-openapi2-spring-boot-starter</artifactId>
             <version>${knife4j.version}</version>
         </dependency>
-        <!-- Sentinel 服务容错与限流 -->
+        <!-- nacos注册中心和配置中心 -->
         <dependency>
             <groupId>com.alibaba.boot</groupId>
             <artifactId>nacos-config-spring-boot-starter</artifactId>
@@ -64,20 +65,17 @@
             <artifactId>spring-cloud-starter-alibaba-sentinel</artifactId>
             <version>${sentinel.version}</version>
         </dependency>
-
         <!-- Apache Commons Lang 工具类 -->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
         </dependency>
-
         <!-- Hutool Java 工具库 -->
         <dependency>
             <groupId>cn.hutool</groupId>
             <artifactId>hutool-all</artifactId>
             <version>${hutool.version}</version>
         </dependency>
-
         <!-- Spring Boot 热部署工具 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -85,7 +83,6 @@
             <scope>runtime</scope>
             <optional>true</optional>
         </dependency>
-
         <!-- MySQL JDBC 驱动 -->
         <dependency>
             <groupId>mysql</groupId>
@@ -93,21 +90,18 @@
             <version>${mysql.version}</version>
             <scope>runtime</scope>
         </dependency>
-
         <!-- Spring Boot 配置元数据生成器 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>
             <optional>true</optional>
         </dependency>
-
         <!-- Lombok 简化 Java 开发 -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
         </dependency>
-
         <!-- Spring Boot 测试工具 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
