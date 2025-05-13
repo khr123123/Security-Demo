@@ -18,6 +18,12 @@ spring:
       transport:
         dashboard: localhost:8080
         client-ip: 127.0.0.1
+  redis:
+    port: 6379
+    host: localhost
+    database: 2
+      #    password:
+
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://47.117.123.182:3306/test
