@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -42,9 +43,10 @@ public class SentinelRulesManager {
         // 单 IP 查看题目列表限流规则
         ParamFlowRule rule = new ParamFlowRule(SentinelConstant.listQuestionVOByPage)
                 .setParamIdx(0) // 对第 0 个参数限流，即 IP 地址
-                .setCount(5) // 每分钟最多 60 次
+                .setCount(60) // 每分钟最多 60 次
                 .setDurationInSec(60); // 规则的统计周期为 60 秒
         ParamFlowRuleManager.loadRules(Collections.singletonList(rule));
+        persistRulesToFile(Arrays.asList(rule), "test1.json");
     }
 
     /**
@@ -69,6 +71,7 @@ public class SentinelRulesManager {
 
         // 加载规则
         DegradeRuleManager.loadRules(Arrays.asList(slowCallRule, errorRateRule));
+        persistRulesToFile(Arrays.asList(slowCallRule, errorRateRule), "test2.json");
     }
 
     /**
@@ -115,4 +118,29 @@ public class SentinelRulesManager {
     private <T> String encodeJson(T t) {
         return JSON.toJSONString(t);
     }
+
+
+    /**
+     * 将任意 Sentinel 规则持久化写入本地 JSON 文件
+     *
+     * @param rules    规则列表（如 FlowRule、DegradeRule、ParamFlowRule）
+     * @param fileName 文件名（如 "FlowRule.json"）
+     * @param <T>      规则泛型
+     */
+    public <T> void persistRulesToFile(List<T> rules, String fileName) {
+        // 获取项目根目录
+        String rootPath = System.getProperty("user.dir");
+        // sentinel 目录路径
+        File sentinelDir = new File(rootPath, "sentinel");
+        if (!FileUtil.exist(sentinelDir)) {
+            FileUtil.mkdir(sentinelDir);
+        }
+        // 目标文件路径
+        File ruleFile = new File(sentinelDir, fileName);
+        String ruleJson = JSON.toJSONString(rules, true); // 美化格式输出
+        // 写入文件（覆盖方式）
+        FileUtil.writeUtf8String(ruleJson, ruleFile);
+        log.info("规则已写入文件：{}", ruleFile.getAbsolutePath());
+    }
+
 }

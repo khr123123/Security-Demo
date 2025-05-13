@@ -34,6 +34,7 @@ public class QuestionBankController {
     @Autowired
     private QuestionBankService questionBankService;
 
+
     /**
      * 分页获取题库列表（封装类）
      *
@@ -63,14 +64,14 @@ public class QuestionBankController {
      * 限流：提示“系统压力过大，请耐心等待”
      * 熔断：执行降级操作
      */
-    public BaseResponse<Page<QuestionBankVO>> handleBlockException(@RequestBody QuestionBankQueryRequest questionBankQueryRequest,
-                                                                   HttpServletRequest request, BlockException ex) {
+    public BaseResponse handleBlockException(@RequestBody QuestionBankQueryRequest questionBankQueryRequest,
+                                             HttpServletRequest request, BlockException ex) {
         // 降级操作
         if (ex instanceof DegradeException) {
             return handleFallback(questionBankQueryRequest, request, ex);
         }
         // 限流操作
-        return (BaseResponse<Page<QuestionBankVO>>) ResultUtils.error(ErrorCode.SYSTEM_ERROR, "系统压力过大，请耐心等待");
+        return ResultUtils.error(ErrorCode.SYSTEM_ERROR, "系统压力过大，请耐心等待");
     }
 
     /**

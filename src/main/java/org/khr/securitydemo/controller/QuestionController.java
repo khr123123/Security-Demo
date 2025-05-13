@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * @author KK
@@ -37,26 +38,6 @@ public class QuestionController {
     private QuestionService questionService;
 
     /**
-     * 分页获取题目列表（封装类）
-     *
-     * @param questionQueryRequest
-     * @param request
-     * @return
-     */
-    @PostMapping("/list/page/vo")
-    public BaseResponse<Page<QuestionVO>> listQuestionVOByPage(@RequestBody QuestionQueryRequest questionQueryRequest,
-                                                               HttpServletRequest request) {
-        ThrowUtils.throwIf(questionQueryRequest == null, ErrorCode.PARAMS_ERROR);
-        long size = questionQueryRequest.getPageSize();
-        // 限制爬虫
-        ThrowUtils.throwIf(size > 20, ErrorCode.PARAMS_ERROR);
-        // 查询数据库
-        Page<Question> questionPage = questionService.listQuestionByPage(questionQueryRequest);
-        // 获取封装类
-        return ResultUtils.success(questionService.getQuestionVOPage(questionPage, request));
-    }
-
-    /**
      * 分页获取题目列表（封装类 - 限流版）
      *
      * @param questionQueryRequest
@@ -64,8 +45,8 @@ public class QuestionController {
      * @return
      */
     @PostMapping("/list/page/vo/sentinel")
-    public BaseResponse<Page<QuestionVO>> listQuestionVOByPageSentinel(@RequestBody QuestionQueryRequest questionQueryRequest,
-                                                                       HttpServletRequest request) {
+    public BaseResponse listQuestionVOByPageSentinel(@RequestBody QuestionQueryRequest questionQueryRequest,
+                                                     HttpServletRequest request) {
         ThrowUtils.throwIf(questionQueryRequest == null, ErrorCode.PARAMS_ERROR);
         long size = questionQueryRequest.getPageSize();
         // 限制爬虫
@@ -83,15 +64,15 @@ public class QuestionController {
         } catch (Throwable ex) {
             // 业务异常
             if (!BlockException.isBlockException(ex)) {
-                Tracer.trace(ex);
-                return (BaseResponse<Page<QuestionVO>>) ResultUtils.error(ErrorCode.SYSTEM_ERROR, "系统错误");
+                Tracer.trace(ex);// 手动上报异常给 Sentinel
+                return ResultUtils.error(ErrorCode.SYSTEM_ERROR, "系统错误");
             }
             // 降级操作
             if (ex instanceof DegradeException) {
                 return handleFallback(questionQueryRequest, request, ex);
             }
             // 限流操作
-            return (BaseResponse<Page<QuestionVO>>) ResultUtils.error(ErrorCode.SYSTEM_ERROR, "访问过于频繁，请稍后再试");
+            return ResultUtils.error(ErrorCode.TOO_MANY_REQUEST, "访问过于频繁，请稍后再试");
         } finally {
             if (entry != null) {
                 entry.exit(1, remoteAddr);
@@ -105,7 +86,11 @@ public class QuestionController {
     public BaseResponse<Page<QuestionVO>> handleFallback(@RequestBody QuestionQueryRequest questionQueryRequest,
                                                          HttpServletRequest request, Throwable ex) {
         // 可以返回本地数据或空数据
-        return ResultUtils.success(null);
+        Page<QuestionVO> questionVOPage = new Page<>();
+        QuestionVO questionVO = new QuestionVO();
+        questionVO.setAnswer("FUCK");
+        questionVOPage.setRecords(List.of(questionVO));
+        return ResultUtils.success(questionVOPage);
     }
 
 }
